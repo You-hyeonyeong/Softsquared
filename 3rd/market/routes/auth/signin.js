@@ -12,12 +12,12 @@ router.post('/', async (req, res) => {
     var selectUserResult = await db.queryParam_Arr(selectUser, [id]);
     if (selectUserResult.length ==1 ) {
         if (pw == selectUserResult[0].userPw) {
-            res.status(200).send(utils.successTrue("로그인 성공",selectUserResult));
+            res.status(200).send(utils.successTrue(200,"로그인 성공",selectUserResult));
         } else {
-            res.status(200).send(utils.successTrue("비밀번호가 올바르지 않습니다"));
+            res.status(200).send(utils.successTrue(401,"비밀번호가 올바르지 않습니다"));
         }
     } else {
-        res.status(200).send(utils.successFalse("존재하지 않는 아이디 입니다"));
+        res.status(200).send(utils.successFalse(400,"존재하지 않는 아이디 입니다"));
     }
 });
 

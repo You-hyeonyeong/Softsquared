@@ -2,14 +2,16 @@ var express = require('express');
 var router = express.Router();
 const db = require('../../modules/pool');
 var utils = require('../../modules/utils');
+var urlencode = require('urlencode');
 
 //상품검색
-router.post('/', async (req, res) => { //쿼리로 검색어 넘기려고 했는데 postman에서 넘기는데 인코딩 해결 못함 -> body로 진행
-    const keyword = req.body.keyword;
+router.get('/', async (req, res) => { 
+    const keyword = req.query.keyword;
     const searchWord = "SELECT name, info, price, isSold FROM product WHERE name LIKE ? ";
-    const searchWordResult = await db.queryParam_Arr(searchWord, ['%'+keyword+'%']);
+    console.log(urlencode.decode(keyword))
+    const decodeKeyword = urlencode.decode(keyword)
 
-    console.log(keyword)
+    const searchWordResult = await db.queryParam_Arr(searchWord, ['%'+decodeKeyword+'%']);
 
     if(!searchWordResult) {
         res.status(200).send(utils.successFalse("검색실패"));
