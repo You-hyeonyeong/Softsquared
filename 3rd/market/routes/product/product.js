@@ -20,7 +20,9 @@ router.get('/', async (req, res) => {
     else CONCAT(TIMESTAMPDIFF(MONTH, createdAt, CURRENT_TIMESTAMP), ' 달 전')\
       END as time_stamp \
     FROM market.product p ,market.category c, market.vilage v \
-    WHERE c.categoryIdx = p.categoryIdx AND p.vilageIdx = v.vilageIdx ORDER BY p.createdAt DESC";
+    WHERE c.categoryIdx = p.categoryIdx AND p.vilageIdx = v.vilageIdx \
+    AND p.isSold = 0\
+    ORDER BY p.createdAt DESC";
 
     const getAllCategoryResult = await db.queryParam_None(getProductQuery);
 
