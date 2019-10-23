@@ -3,33 +3,27 @@ var router = express.Router();
 const db = require('../../modules/pool');
 var utils = require('../../modules/utils');
 
-//상품 찜/취소
-router.post('/:userIdx/:productIdx', async (req, res) => {
+//상품 관심목록 추가
+router.post('/:productIdx/:userIdx', async (req, res) => {
     const userIdx = req.params.userIdx;
     const productIdx = req.params.productIdx;
 
+    const user = await db.queryParam_Parse('SELECT userIdx FROM user WHERE userIdx = ?',[userIdx]);
+    const product = await db.queryParam_Parse('SELECT productIdx FROM user WHERE productIdx = ?',[productIdx]);
     const select = 'SELECT * FROM market.like WHERE userIdx = ? AND productIdx = ?'
     const insertLike = 'INSERT INTO market.like (userIdx, productIdx) VALUES (?, ?)';
     const deleteLike = 'DELETE FROM market.like WHERE userIdx = ? AND productIdx = ?';
     const likeResult = await db.queryParam_Parse(select,[userIdx, productIdx]);
-    console.log(likeResult.length )
-
-   
-        if(likeResult.length == 0){
+    console.log(likeResult)
+    //사용자와 상품이 없을때는 어떻게..? 각테이블에 가서 있는 인덱스인지 확인?
+        if(likeResult.length === 0){
             const insertResult = await db.queryParam_Parse(insertLike,[userIdx, productIdx]);
-            res.status(200).send(utils.successTrue("찜"),insertResult);
+            res.status(200).send(utils.successTrue(200,"관심목록 추가"));
         } else if (likeResult.length == 1){
             console.log("eeeem")
             const deleteLikeResult = await db.queryParam_Parse(deleteLike,[userIdx, productIdx]);
-            res.status(200).send(utils.successTrue("찜 취소"));
-        } else {
-            console.log("eeedddddem")
-            res.status(200).send(utils.successFalse("하하 뭔데-"));
+            res.status(200).send(utils.successTrue(200,"관심목록 취소"));
         }
-    
 });
-
-
-
 
 module.exports = router;
