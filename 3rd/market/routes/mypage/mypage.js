@@ -8,14 +8,12 @@ var utils = require('../../modules/utils');
 router.get('/:userIdx', async (req, res) => {
     const userIdx = req.params.userIdx;
     const getUser = 'SELECT u.userName, u.userId, v.vilage FROM user u, vilage v WHERE u.vilageIdx = v.vilageIdx AND userIdx = ?'
-    const getAccount = 'SELECT p.name p.info p.price a.type FROM product p, account a WHERE p.productIdx = a.productIdx AND p.userIdx = ?'
     const getUserResult = await db.queryParam_Arr(getUser,[userIdx]);
-    const getAccountResult = await db.queryParam_Arr(getAccount,[userIdx]);
 
     if(!getUserResult) {
         res.status(200).send(utils.successFalse("마이페이지 조회 실패"));
     } else {
-        res.status(200).send(utils.successTrue("마이페이지 조회 성공", getUserResult ,getAccountResult));
+        res.status(200).send(utils.successTrue("마이페이지 조회 성공", getUserResult));
     }
 
 });
@@ -45,6 +43,35 @@ router.get('/:userIdx/buy', async (req, res) => {
         res.status(200).send(utils.successFalse("구매내역 조회 실패"));
     } else {
         res.status(200).send(utils.successTrue("구매내역 조회 성공", getAccountBuy));
+    }
+
+});
+
+//좋아요 목록
+router.get('/:userIdx/like', async (req, res) => {
+    const userIdx = req.params.userIdx;
+    const getLike = 
+    "SELECT l.useridx, p.name, p.info, p.price, p.isSold, v.vilage, c.commentIdx,\
+    (SELECT COUNT(*) FROM market.like l WHERE p.productIdx = l.productIdx) as likeCnt,\
+    CASE WHEN TIMESTAMPDIFF(MINUTE, p.createdAt, CURRENT_TIMESTAMP) < 60 \
+    then CONCAT('끌올 ',TIMESTAMPDIFF(MINUTE, p.createdAt, CURRENT_TIMESTAMP), ' 분 전') \
+    WHEN TIMESTAMPDIFF(HOUR, p.createdAt, CURRENT_TIMESTAMP) < 24 \
+            then CONCAT('끌올 ',TIMESTAMPDIFF(HOUR, p.createdAt, CURRENT_TIMESTAMP), ' 시간 전') \
+   WHEN TIMESTAMPDIFF(DAY, p.createdAt, CURRENT_TIMESTAMP) < 7 \
+            then CONCAT(TIMESTAMPDIFF(DAY, p.createdAt, CURRENT_TIMESTAMP), ' 일 전')\
+   WHEN TIMESTAMPDIFF(WEEK, p.createdAt, CURRENT_TIMESTAMP) < 4\
+            then CONCAT(TIMESTAMPDIFF(WEEK, p.createdAt, CURRENT_TIMESTAMP), ' 주 전')\
+    else CONCAT(TIMESTAMPDIFF(MONTH, p.createdAt, CURRENT_TIMESTAMP), ' 달 전')\
+      END as time_stamp \
+      FROM market.product p, market.vilage v, market.comment c, market.like l \
+      WHERE p.vilageIdx = v.vilageIdx AND c.productIdx = p.productIdx AND l.productIdx = p.productIdx AND l.userIdx = ? ";
+// 'SELECT p.name, p.info, l.userIdx FROM market.like l, market.product p WHERE l.productIdx = p.productIdx AND l.userIdx = ?'
+    const getLikeResult = await db.queryParam_Arr(getLike,[userIdx]);
+
+    if(!getLikeResult) {
+        res.status(200).send(utils.successFalse("관심목록 조회 실패"));
+    } else {
+        res.status(200).send(utils.successTrue("관심목록 조회 성공", getLikeResult));
     }
 
 });
