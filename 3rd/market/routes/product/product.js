@@ -37,9 +37,10 @@ router.get('/', async (req, res) => {
 //name info price isSold category 댓글 이회원의 상품
 router.get('/:productIdx', async (req, res) => {
     const productIdx = req.params.productIdx;
-    const getProduct = 'SELECT p.name, p.info, c.title, v.vilage \
-    FROM market.product p, market.user u, market.vilage v, market.category c \
-    WHERE p.userIdx = u.userIdx AND p.vilageIdx = v.vilageIdx AND c.categoryIdx = p.categoryIdx AND p.productIdx = ?'
+    const getProduct = 'SELECT p.name, p.info, c.title, v.vilage, \
+    (SELECT COUNT(*) FROM market.comment c WHERE p.productIdx = c.productIdx) as commentCnt,\
+    FROM market.product p, market.vilage v, market.category c \
+    WHERE p.vilageIdx = v.vilageIdx AND c.categoryIdx = p.categoryIdx AND p.productIdx = ?'
 
     const getProductResult = await db.queryParam_Arr(getProduct, [productIdx]);
     console.log(getProductResult)
