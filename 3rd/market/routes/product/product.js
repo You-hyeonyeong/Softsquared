@@ -38,7 +38,8 @@ router.get('/', async (req, res) => {
 router.get('/:productIdx', async (req, res) => {
     const productIdx = req.params.productIdx;
     const getProduct = 'SELECT p.name, p.info, c.title, v.vilage, \
-    (SELECT COUNT(*) FROM market.comment c WHERE p.productIdx = c.productIdx) as commentCnt,\
+    (SELECT COUNT(*) FROM market.like l WHERE p.productIdx = l.productIdx) as likeCnt,\
+    (SELECT COUNT(*) FROM market.comment c WHERE p.productIdx = c.productIdx) as commentCnt\
     FROM market.product p, market.vilage v, market.category c \
     WHERE p.vilageIdx = v.vilageIdx AND c.categoryIdx = p.categoryIdx AND p.productIdx = ?'
 
