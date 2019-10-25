@@ -25,7 +25,7 @@ router.get('/', async (req, res) => {
     AND p.isSold = 0\
     ORDER BY p.createdAt DESC";
 
-    const getAllCategoryResult = await db.queryParam_None(getProductQuery);
+    const getAllCategoryResult = await db.query(getProductQuery);
 
     if (!getAllCategoryResult) {
         res.status(200).send(utils.successFalse(600, "상품 조회 실패"));
@@ -43,7 +43,7 @@ router.get('/:productIdx', async (req, res) => {
     FROM market.product p, market.vilage v, market.category c \
     WHERE p.vilageIdx = v.vilageIdx AND c.categoryIdx = p.categoryIdx AND p.productIdx = ?'
 
-    const getProductResult = await db.queryParam_Arr(getProduct, [productIdx]);
+    const getProductResult = await db.query(getProduct, [productIdx]);
     console.log(getProductResult)
     if (!getProductResult) {
         res.status(200).send(utils.successFalse(600, "상품 상세조회 실패"));
@@ -61,14 +61,14 @@ router.post('/:categoryIdx', async (req, res) => {
     const price = req.body.price;
     const userIdx = req.body.userIdx;
     const categoryIdx = req.params.categoryIdx;
-    const vilageIdx = await db.queryParam_Arr('SELECT v.vilageIdx FROM market.vilage v, market.user u WHERE v.vilageIdx = u.vilageIdx AND u.userIdx = ?',[userIdx]);
+    const vilageIdx = await db.query('SELECT v.vilageIdx FROM market.vilage v, market.user u WHERE v.vilageIdx = u.vilageIdx AND u.userIdx = ?',[userIdx]);
     const insertProduct = 'INSERT INTO product (name, info, price, categoryIdx, userIdx, vilageIdx) VALUES (?,?,?,?,?,?)'
 
     if (!name || !info || !price || !categoryIdx) {
         res.status(200).send(utils.successFalse("필수값을 입력하세요"));
     } else {
         if (categoryIdx < 7) {
-            const insertProductResult = await db.queryParam_Parse(insertProduct, [name, info, price, categoryIdx, userIdx, vilageIdx[0].vilageIdx]);
+            const insertProductResult = await db.query(insertProduct, [name, info, price, categoryIdx, userIdx, vilageIdx[0].vilageIdx]);
             res.status(200).send(utils.successTrue(201,"상품등록 되었습니다."));
             if (!insertProductResult) {
                 res.status(200).send(utils.successFalse(600,"상품 등록 실패"));
@@ -84,11 +84,11 @@ router.delete('/:productIdx/:userIdx', async (req, res) => {
     const productIdx = req.params.productIdx;
 
     const getProductQuery = 'SELECT * FROM market.product WHERE userIdx = ? AND productIdx = ?';
-    const getAllCategoryResult = await db.queryParam_Parse(getProductQuery, [userIdx, productIdx]);
+    const getAllCategoryResult = await db.query(getProductQuery, [userIdx, productIdx]);
 
     if (getAllCategoryResult.length == 1) {
         const deletProduct = 'DELETE FROM market.product WHERE userIdx = ? AND productIdx = ?'
-        const deletProductResult = await db.queryParam_Parse(deletProduct, [userIdx, productIdx]);
+        const deletProductResult = await db.query(deletProduct, [userIdx, productIdx]);
         res.status(200).send(utils.successTrue("상품삭제 성공", getAllCategoryResult));
     } else {
         res.status(200).send(utils.successFalse("등록한 상품이 없습니다."));

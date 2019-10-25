@@ -9,7 +9,7 @@ router.post('/', async (req, res) => {
     const pw = req.body.userPw;
 
     var selectUser = "SELECT userId, userPw FROM market.user WHERE userId = ? ";
-    var selectUserResult = await db.queryParam_Arr(selectUser, [id]);
+    var selectUserResult = await db.query(selectUser, [id]);
     if (selectUserResult.length ==1 ) {
         if (pw == selectUserResult[0].userPw) {
             res.status(200).send(utils.successTrue(200,"로그인 성공",selectUserResult));

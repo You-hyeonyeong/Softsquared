@@ -19,7 +19,7 @@ router.get('/:productIdx', async (req, res) => {
     else CONCAT(TIMESTAMPDIFF(MONTH, c.createdAt, CURRENT_TIMESTAMP), ' 달 전')\
     END as time_stamp \
     FROM market.product p, market.user u, market.comment c WHERE p.userIdx = u.userIdx AND c.productIdx = p.productIdx AND c.productIdx = ?";
-    const getProductResult = await db.queryParam_Arr(getComments,[productIdx])
+    const getProductResult = await db.query(getComments,[productIdx])
         if(getProductResult == "") res.status(200).send(utils.successTrue(201,"해당상품이 존재하지 않습니다."));
         else {
             if (!getProductResult) {
@@ -35,12 +35,12 @@ router.post('/:productIdx/:userIdx', async (req, res) => {
     const userIdx = req.params.userIdx;
     const productIdx = req.params.productIdx;
     const contents = req.body.contents;
-    const getProductIdx = await db.queryParam_Arr('SELECT productIdx FROM product WHERE productIdx = ?',[productIdx])
+    const getProductIdx = await db.query('SELECT productIdx FROM product WHERE productIdx = ?',[productIdx])
     console.log(getProductIdx)
         if(getProductIdx == "") res.status(200).send(utils.successTrue(201,"해당상품이 존재하지 않습니다."));
         else {
             const writeComment = 'INSERT INTO comment(userIdx, productIdx, contents) VALUES (?,?,?)';
-            const writeCommentResult = await db.queryParam_Arr(writeComment,[userIdx, productIdx, contents]);
+            const writeCommentResult = await db.query(writeComment,[userIdx, productIdx, contents]);
             if (!writeCommentResult) {
                 res.status(200).send(utils.successFalse(600,"댓글 작성 실패")); 
             } else {
@@ -54,11 +54,11 @@ router.delete('/:commentIdx/:userIdx', async (req, res) => {
     const commentIdx = req.params.commentIdx;
 
     const delComment = 'SELECT * FROM market.comment WHERE userIdx = ? AND commentIdx = ?';
-    const delCommentResult = await db.queryParam_Parse(delComment, [userIdx, commentIdx]);
+    const delCommentResult = await db.query(delComment, [userIdx, commentIdx]);
 
     if (delCommentResult.length == 1) {
         const deleteComment = 'DELETE FROM market.comment WHERE userIdx = ? AND commentIdx = ?'
-        const deleteCommentR = await db.queryParam_Parse(deleteComment, [userIdx, commentIdx]);
+        const deleteCommentR = await db.query(deleteComment, [userIdx, commentIdx]);
         res.status(200).send(utils.successTrue(200,"댓글 삭제 성공", delCommentResult));
     } else {
         if(!delCommentResult) res.status(200).send(utils.successFalse(600,"서버오류"));

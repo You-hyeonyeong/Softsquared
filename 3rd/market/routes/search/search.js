@@ -26,7 +26,7 @@ router.get('/', async (req, res) => {
     console.log(urlencode.decode(keyword))
     const decodeKeyword = urlencode.decode(keyword)
 
-    const searchWordResult = await db.queryParam_Arr(searchWord, ['%'+decodeKeyword+'%']);
+    const searchWordResult = await db.query(searchWord, ['%'+decodeKeyword+'%']);
 
     if(!searchWordResult) {
         res.status(200).send(utils.successFalse(600,"검색실패"));
