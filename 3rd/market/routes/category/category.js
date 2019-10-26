@@ -7,7 +7,7 @@ const db = require('../../modules/pool');
 //카테고리별 조회
 router.get('/', async (req, res) => {
     const getAllCategoryQuery = 'SELECT * FROM market.category';
-    const getAllCategoryResult = await db.queryParam_None(getAllCategoryQuery);
+    const getAllCategoryResult = await db.query(getAllCategoryQuery);
 
 	if (!getAllCategoryResult) {
 		res.status(200).send(utils.successFalse(600,"카테고리 조회 실패")); 
