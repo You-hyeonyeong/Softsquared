@@ -9,7 +9,7 @@ router.post('/:productIdx/:userIdx', async (req, res) => {
     const productIdx = req.params.productIdx;
 
     const user = await db.query('SELECT userIdx FROM user WHERE userIdx = ?',[userIdx]);
-    const product = await db.query('SELECT productIdx FROM user WHERE productIdx = ?',[productIdx]);
+    const product = await db.query('SELECT productIdx FROM product WHERE productIdx = ?',[productIdx]);
     const select = 'SELECT * FROM market.like WHERE userIdx = ? AND productIdx = ?'
     const insertLike = 'INSERT INTO market.like (userIdx, productIdx) VALUES (?, ?)';
     const deleteLike = 'DELETE FROM market.like WHERE userIdx = ? AND productIdx = ?';

@@ -11,8 +11,10 @@ router.post('/', async (req, res) => {
     var selectUser = "SELECT userId, userPw FROM market.user WHERE userId = ? ";
     var selectUserResult = await db.query(selectUser, [id]);
     if (selectUserResult.length ==1 ) {
+      console.log ( selectUserResult[0].userPw)
+      console.log (pw)
         if (pw == selectUserResult[0].userPw) {
-            res.status(200).send(utils.successTrue(200,"로그인 성공",selectUserResult));
+            res.status(200).send(utils.successTrue(200,"로그인 성공"));
         } else {
             res.status(200).send(utils.successTrue(401,"비밀번호가 올바르지 않습니다"));
         }

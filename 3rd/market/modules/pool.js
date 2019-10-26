@@ -9,6 +9,7 @@ module.exports = { // 두 개의 메소드 module화
         var pool = await poolPromise;
         const connection = await pool.getConnection();
         const result = await connection.query(queryText, data) || null;
+        console.log(result);
     
         connection.release();
     
