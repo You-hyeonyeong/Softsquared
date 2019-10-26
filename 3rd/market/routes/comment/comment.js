@@ -7,7 +7,7 @@ const db = require('../../modules/pool');
 //작성자 댓글내용 작성일 
 router.get('/:productIdx', async (req, res) => {
     const productIdx = req.params.productIdx;
-    const getComments = "SELECT u.userName, c.contents, \
+    const getComments = "SELECT u.userName, c.contents, v.vilage, \
     CASE WHEN TIMESTAMPDIFF(MINUTE, c.createdAt, CURRENT_TIMESTAMP) < 60 \
     then CONCAT(TIMESTAMPDIFF(MINUTE, c.createdAt, CURRENT_TIMESTAMP), ' 분 전') \
     WHEN TIMESTAMPDIFF(HOUR, c.createdAt, CURRENT_TIMESTAMP) < 24 \
@@ -18,7 +18,7 @@ router.get('/:productIdx', async (req, res) => {
             then CONCAT(TIMESTAMPDIFF(WEEK, c.createdAt, CURRENT_TIMESTAMP), ' 주 전')\
     else CONCAT(TIMESTAMPDIFF(MONTH, c.createdAt, CURRENT_TIMESTAMP), ' 달 전')\
     END as time_stamp \
-    FROM market.product p, market.user u, market.comment c WHERE p.userIdx = u.userIdx AND c.productIdx = p.productIdx AND c.productIdx = ?";
+    FROM market.product p, market.user u, market.comment c, market.vilage v WHERE p.userIdx = u.userIdx AND c.productIdx = p.productIdx AND u.vilageIdx = v.vilageIdx AND c.productIdx = ?";
     const getProductResult = await db.query(getComments,[productIdx])
         if(getProductResult == "") res.status(200).send(utils.successTrue(201,"해당상품이 존재하지 않습니다."));
         else {
