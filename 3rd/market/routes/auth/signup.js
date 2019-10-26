@@ -8,6 +8,16 @@ router.post('/', async (req, res) => {
     const id = req.body.userId;
     const pw = req.body.userPw;
     const name = req.body.userName;
+
+    var jwt      = require('jsonwebtoken');
+    var tokenKey = "TEST_KEY11"; //토큰키 서버에서 보관 중요
+    var payLoad  = {'uid':14554};
+    var token = jwt.sign(payLoad,tokenKey,{
+        algorithm : 'HS256', //"HS256", "HS384", "HS512", "RS256", "RS384", "RS512" default SHA256
+        expiresInMinutes : 1440 //expires in 24 hours
+    });
+    console.log("token : ", token);
+    
     var insertUser = "INSERT INTO user (userId, userPw, userName) VALUES (?,?,?)";
     var selectUser = "SELECT userId FROM market.user WHERE userId = ?";
 
