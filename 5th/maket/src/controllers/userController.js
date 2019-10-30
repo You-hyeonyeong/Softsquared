@@ -1,4 +1,3 @@
-const {pool} = require('../../config/database');
 const jwt = require('../../modules/jwt');
 const { logger } = require('../../config/winston');
 const utils = require('../../modules/resModule')
@@ -51,19 +50,4 @@ exports.postSignin = async function (req, res) {
     } else {
         res.status(200).send(utils.successFalse(400,"존재하지 않는 아이디 입니다"));
     }
-
-    // if (!name) return res.json({isSuccess: false, code: 201, message: "이름을 적어주세요."});
-
-    // const tokenValue = jwt.sign(
-    //     {
-    //         name: name
-    //     },
-    //     'developmentTokenSecret',
-    //     {
-    //         expiresIn: '365d',
-    //         subject: 'test'
-    //     }
-    // );
-
-    //  return res.json({isSuccess: true, code: 200, jwt: tokenValue});
 };
