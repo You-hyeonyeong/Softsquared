@@ -1,6 +1,6 @@
-const index = require('../controllers/likeController');
-
-module.exports = function(app){ 
+module.exports = function(app){
     console.log("라이크 라우트 들어오니?")
-    app.post('/like', index.postSignin);
+    const likeController = require('../controllers/likeController');
+    //app.get('/product',productController.postProductSearch);
+    app.route('/like/:productIdx').post(likeController.postLike);
 };
