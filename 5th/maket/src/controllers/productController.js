@@ -11,7 +11,7 @@ exports.getProduct = async function (req, res) {
     const tt = jwt.verify(req.headers.token)
     console.log(tt.idx) //idx 값출력
     const getProductQuery =
-    "SELECT p.productIdx, p.name, p.price, p.saleStatus, v.vilage,\
+        "SELECT p.productIdx, p.name, p.price, p.saleStatus, v.vilage,\
     (SELECT COUNT(*) FROM market.like l WHERE p.productIdx = l.productIdx) as likeCnt,\
     (SELECT COUNT(*) FROM market.comment c WHERE p.productIdx = c.productIdx) as commentCnt,\
     CASE WHEN TIMESTAMPDIFF(MINUTE, createdAt, CURRENT_TIMESTAMP) < 60 \
@@ -31,7 +31,7 @@ exports.getProduct = async function (req, res) {
     WHERE p.saleStatus = 0 \
     ORDER BY p.createdAt DESC";
 
-    const getAllCategoryResult = await db.query(getProductQuery,[tt.idx]);
+    const getAllCategoryResult = await db.query(getProductQuery, [tt.idx]);
 
     if (!getAllCategoryResult) {
         res.send(utils.successFalse(600, "상품 조회 실패"));
@@ -78,11 +78,11 @@ exports.postProduct = async function (req, res) {
     } else {
         if (categoryIdx < 7) {
             const insertProductResult = await db.query(insertProduct, [name, info, price, categoryIdx, token]);
-            res.status(200).send(utils.successTrue(201,"상품등록 되었습니다.","productIdx : "+insertProductResult.insertId));
+            res.status(200).send(utils.successTrue(201, "상품등록 되었습니다.", "productIdx : " + insertProductResult.insertId));
             if (!insertProductResult) {
-                res.status(200).send(utils.successFalse(600,"상품 등록 실패"));
+                res.status(200).send(utils.successFalse(600, "상품 등록 실패"));
             }
-        } else res.status(200).send(utils.successFalse(404,"유효하지 않은 카테고리 입니다."));
+        } else res.status(200).send(utils.successFalse(404, "유효하지 않은 카테고리 입니다."));
     }
 };
 
@@ -98,9 +98,9 @@ exports.delProduct = async function (req, res) {
     if (getAllCategoryResult.length == 1) {
         const deletProduct = 'DELETE FROM market.product WHERE userIdx = ? AND productIdx = ?'
         const deletProductResult = await db.query(deletProduct, [token, productIdx]);
-        res.send(utils.successTrue(200,"상품삭제 성공"));
+        res.send(utils.successTrue(200, "상품삭제 성공"));
     } else {
-        res.send(utils.successFalse(404,"등록한 상품이 없거나 권한이 없습니다."));
+        res.send(utils.successFalse(404, "등록한 상품이 없거나 권한이 없습니다."));
     }
 };
 
@@ -128,15 +128,43 @@ exports.postProductSearch = async function (req, res) {
       WHERE p.name LIKE ? ";
     console.log(urlencode.decode(keyword))
     const decodeKeyword = urlencode.decode(keyword)
-    const searchWordResult = await db.query(searchWord, ['%'+decodeKeyword+'%']);
-    if(!searchWordResult) {
-        res.status(200).send(utils.successFalse(600,"검색실패"));
-    } else if(searchWordResult.length >= 1){
-        res.status(200).send(utils.successTrue(200,"검색성공", searchWordResult));
+    const searchWordResult = await db.query(searchWord, ['%' + decodeKeyword + '%']);
+    if (!searchWordResult) {
+        res.status(200).send(utils.successFalse(600, "검색실패"));
+    } else if (searchWordResult.length >= 1) {
+        res.status(200).send(utils.successTrue(200, "검색성공", searchWordResult));
     }
-    else{
-        res.status(200).send(utils.successFalse(404,"해당 상품이 존재하지 않습니다."));
+    else {
+        res.status(200).send(utils.successFalse(404, "해당 상품이 존재하지 않습니다."));
     }
 
-    
+
+};
+
+//상품판매 확정
+//판매중0/예약중1/거래완료2
+//내가 누구한테 물품을 팔았다 0-> 1로변경하면 변경만 / 0,1 -> 2로 변경하면 -> 구매확정테이블
+exports.putProduct = async function (req, res) {
+    const tt = jwt.verify(req.headers.token)
+    const token = tt.idx;
+    const productIdx = req.params.productIdx;
+    const status = req.body.status
+    const buyer = req.body.buyer
+
+    if(status == 1){ //예약중으로 변경했을때
+        const putProductQuery = 'UPDATE market.product SET saleStatus = ? WHERE userIdx = ?';
+        const putProductResult = await db.query(putProductQuery, [status,token]);
+        res.send(utils.successTrue(200, "예약중으로 변경되었습니다."));
+    } else if (status == 2) { //구매확정으로 변경헀을때
+        const putProductQuery = 'UPDATE market.product SET saleStatus = ? WHERE userIdx = ?';
+        const putProductResult = await db.query(putProductQuery, [status,token]);
+        //추가해줄때 중복있나 없나 확인하고 
+        const addAccount = await db.query('INSERT INTO market.account(userIdx, productIdx) VALUES (?, ?)',[buyer,productIdx])
+        res.send(utils.successTrue(200, "구매확정으로 변경되었습니다."));
+    } else if (status == 0) { //다시판매중으로 변경했을때
+        //구매확정테이블에 해당 컬럼있다면 지우기 없다면 그냥 response
+        res.send(utils.successTrue(404, "판매중으로 변경하였습니다."));
+    }else {
+            res.send(utils.successFalse(404, "등록한 상품이 없거나 권한이 없습니다."));
+        }
 };

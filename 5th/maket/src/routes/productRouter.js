@@ -6,4 +6,5 @@ module.exports = function(app){
     app.get('/product/:productIdx',productController.postProductDetail);
     app.route('/product/:categoryIdx').post(productController.postProduct);
     app.route('/product/:productIdx').delete(productController.delProduct);
+    app.route('/product/sale/:productIdx').put(productController.putProduct);
 };

@@ -35,19 +35,41 @@ exports.getComment = async function (req, res) {
             }
         }    
 };
+
 //댓글등록
 exports.postComment = async function (req, res) {
     const tt = jwt.verify(req.headers.token)
     const token = tt.idx;
-
-    
-    
+    const productIdx = req.params.productIdx;
+    const contents = req.body.contents;
+    const getProductIdx = await db.query('SELECT productIdx FROM product WHERE productIdx = ?',[productIdx])
+    console.log(getProductIdx)
+        if(getProductIdx == "") res.send(utils.successTrue(201,"해당상품이 존재하지 않습니다."));
+        else {
+            const writeComment = 'INSERT INTO comment(userIdx, productIdx, contents) VALUES (?,?,?)';
+            const writeCommentResult = await db.query(writeComment,[token, productIdx, contents]);
+            if (!writeCommentResult) {
+                res.send(utils.successFalse(600,"댓글 작성 실패")); 
+            } else {
+                res.send(utils.successTrue(201,"댓글 작성 성공"));
+            }
+        }
 };
 //댓글삭제
 exports.delComment = async function (req, res) {
     const tt = jwt.verify(req.headers.token)
     const token = tt.idx;
 
-    
-    
+    const commentIdx = req.params.commentIdx;
+    const delComment = 'SELECT * FROM market.comment WHERE userIdx = ? AND commentIdx = ?';
+    const delCommentResult = await db.query(delComment, [token, commentIdx]);
+
+    if (delCommentResult.length == 1) {
+        const deleteComment = 'DELETE FROM market.comment WHERE userIdx = ? AND commentIdx = ?'
+        const deleteCommentR = await db.query(deleteComment, [token, commentIdx]);
+        res.send(utils.successTrue(200,"댓글 삭제 성공", delCommentResult[0]));
+    } else {
+        if(!delCommentResult) res.send(utils.successFalse(600,"서버오류"));
+        else res.send(utils.successFalse(404,"등록한 댓글이 없습니다."));
+    }
 };
