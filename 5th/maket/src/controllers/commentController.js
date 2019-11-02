@@ -70,6 +70,6 @@ exports.delComment = async function (req, res) {
         res.send(utils.successTrue(200,"댓글 삭제 성공", delCommentResult[0]));
     } else {
         if(!delCommentResult) res.send(utils.successFalse(600,"서버오류"));
-        else res.send(utils.successFalse(404,"등록한 댓글이 없습니다."));
+        else res.send(utils.successFalse(404,"등록한 댓글이 없거나 권한이 없습니다."));
     }
 };

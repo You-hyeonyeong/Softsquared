@@ -9,13 +9,14 @@ var cron = require('node-cron');
 //manner_two : 시간약속을 잘지켜요 2도 상승
 //manner_three : 친절하고 매너가 좋아요 3도 상승
 exports.postManner = async function (req, res) {
+    //누가평가햿는지 모르게
     // const tt = jwt.verify(req.headers.token)
     //const token = tt.idx;
     const userIdx = req.body.userIdx
     const mannerType = req.body.mannerType 
 
     if (mannerType >= 1 && mannerType <= 3) {
-        const addmanner = 'INSERT INTO market.manner(mannerType, userIdx) VALUES (?, ?, ?)'
+        const addmanner = 'INSERT INTO market.manner(mannerType, userIdx) VALUES (?, ?)'
         const addmannerResult = await db.query(addmanner, [mannerType, userIdx])
         if (!addmannerResult) {
             res.send(utils.successFalse(600, "디비에러"));
@@ -41,27 +42,15 @@ exports.getManner = async function (req, res) {
     as mannerTemperature\
     FROM market.manner\
     WHERE userIdx = ?',[token])
-    const updateTemperature = await db.query()
+    console.log(userManner[0].mannerTemperature)
+    const updateTemperature = await db.query('UPDATE market.user SET mannerTemperature = ? WHERE userIdx =  ?',[userManner[0].mannerTemperature, token])
     if(!userManner) res.send(utils.successFalse(200, "매너온도 조회 실패"));
     else {
         res.send(utils.successTrue(200, "매너온도 조회 완료", userManner));
     }
 
-    // 한시간에 한번씩 매너얼굴온도
-    // second minute hour day-of-month month day-of-week
-    cron.schedule('*/5 * * * *', function(){
-    logger.info('5분 마다 바뀌는 node-cron 테스트');
-
-    const date = Date.prototype.yyyymmdd = function() {
-        var yyyy = this.getFullYear().toString();
-        var mm = (this.getMonth() + 1).toString();
-        var dd = this.getDate().toString();
-        return  yyyy + "-" + (mm[1] ? mm : "0" + mm[0]) + "-" + (dd[1] ? dd : "0" + dd[0]);
-    }
-    logger.info(date);
-    //오분마다 업데이트 진행한 시간 이후꺼 조회해서 업데이트 해주면 됨
-    const updateManner = 'UPDATE market.manner SET mannerTemperature = ? WHERE userIdx = ? AND '
-});
+  
+    
 };
 //거래 후기 작성하기
 //review_four : 별로에요 1도 하락
@@ -84,7 +73,7 @@ exports.postReview = async function (req, res) {
     } else res.send(utils.successFalse(404, "범위에 맞는 값을 입력해주세요"));
 };
 //매너평가 조회
-//명수 추가해야하는데 어떻게 하지
+//항목별 평가 명수 추가해야하는데 어떻게 하지
 exports.getReview = async function (req, res) {
     const tt = jwt.verify(req.headers.token)
     const token = tt.idx;
@@ -102,4 +91,20 @@ exports.getReview = async function (req, res) {
     else res.send(utils.successTrue(200, "매너평가 조회 성공", mannerResult));
 
 };
+
+  // 한시간에 한번씩 매너얼굴온도
+    // second minute hour day-of-month month day-of-week
+cron.schedule('*/5 * * * *', function(){
+    logger.info('5분 마다 바뀌는 node-cron 테스트');
+
+    // const date = Date.prototype.yyyymmdd = function() {
+    //     var yyyy = this.getFullYear().toString();
+    //     var mm = (this.getMonth() + 1).toString();
+    //     var dd = this.getDate().toString();
+    //     return  yyyy + "-" + (mm[1] ? mm : "0" + mm[0]) + "-" + (dd[1] ? dd : "0" + dd[0]);
+    // }
+    // logger.info(yyyymmdd);
+    //오분마다 업데이트 진행한 시간 이후꺼 조회해서 업데이트 해주면 됨
+    const updateManner = 'UPDATE market.manner SET mannerTemperature = ? WHERE userIdx = ? AND '
+});
 

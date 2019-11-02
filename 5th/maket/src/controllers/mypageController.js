@@ -55,11 +55,11 @@ exports.getMypageBuy = async function (req, res) {
 	const getAccountBuy = await db.query(getBuy,[token]);
 	
     if(!getAccountBuy) {
-        res.status(200).send(utils.successFalse("구매내역 조회 실패"));
+        res.status(200).send(utils.successFalse(600,"구매내역 조회 실패"));
     } else {
-		console.log(getAccountBuy)
-		console.log(getAccountBuy)
-        res.status(200).send(utils.successTrue("구매내역 조회 성공", getAccountBuy));
+        console.log(getAccountBuy)
+        if(getAccountBuy.length == 0 ) res.status(200).send(utils.successFalse(404,"구매내역이 없습니다"));
+        else res.status(200).send(utils.successTrue(200,"구매내역 조회 성공", getAccountBuy));
     }
     
     
@@ -71,9 +71,9 @@ exports.getMypageSale = async function (req, res) {
 	const tt = jwt.verify(req.headers.token)
 	const token = tt.idx;
 
-	const getsaleing = await db.query('SELECT name, info, price FROM product WHERE userIdx = ? AND saleStatus = 0',[token])
-	const getreservation = await db.query('SELECT name, info, price FROM product WHERE userIdx = ? AND saleStatus = 1',[token])
-	const getcomplete = await db.query('SELECT name, info, price FROM product WHERE userIdx = ? AND saleStatus = 2',[token])
+	const getsaleing = await db.query('SELECT productIdx, name, info, price FROM product WHERE userIdx = ? AND saleStatus = 0',[token])
+	const getreservation = await db.query('SELECT productIdx, name, info, price FROM product WHERE userIdx = ? AND saleStatus = 1',[token])
+	const getcomplete = await db.query('SELECT productIdx, name, info, price FROM product WHERE userIdx = ? AND saleStatus = 2',[token])
 
 	const allResult = {
 		"판매중": getsaleing,
@@ -115,9 +115,10 @@ exports.getMypageLike = async function (req, res) {
     const getLikeResult = await db.query(getLike,[token]);
 
     if(!getLikeResult) {
-        res.send(utils.successFalse("관심목록 조회 실패"));
+        res.send(utils.successFalse(600,"관심목록 조회 실패"));
     } else {
-        res.send(utils.successTrue("관심목록 조회 성공", getLikeResult));
+        if(getLikeResult.length == 0) res.send(utils.successFalse(404,"관심목록이 없습니다"));
+        else res.send(utils.successTrue("관심목록 조회 성공", getLikeResult));
     }
 
     

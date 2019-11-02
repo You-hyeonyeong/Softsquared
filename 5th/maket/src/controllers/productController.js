@@ -11,7 +11,7 @@ exports.getProduct = async function (req, res) {
     const tt = jwt.verify(req.headers.token)
     console.log(tt.idx) //idx 값출력
     const getProductQuery =
-        "SELECT p.productIdx, p.name, p.price, p.saleStatus, v.vilage,\
+    "SELECT p.productIdx, p.name, p.price, p.saleStatus, v.vilage,\
     (SELECT COUNT(*) FROM market.like l WHERE p.productIdx = l.productIdx) as likeCnt,\
     (SELECT COUNT(*) FROM market.comment c WHERE p.productIdx = c.productIdx) as commentCnt,\
     CASE WHEN TIMESTAMPDIFF(MINUTE, createdAt, CURRENT_TIMESTAMP) < 60 \
@@ -158,13 +158,25 @@ exports.putProduct = async function (req, res) {
     } else if (status == 2) { //구매확정으로 변경헀을때
         const putProductQuery = 'UPDATE market.product SET saleStatus = ? WHERE userIdx = ?';
         const putProductResult = await db.query(putProductQuery, [status,token]);
-        //추가해줄때 중복있나 없나 확인하고 
+        //추가해줄 때 중복있나 없나 확인하고 
         const addAccount = await db.query('INSERT INTO market.account(userIdx, productIdx) VALUES (?, ?)',[buyer,productIdx])
         res.send(utils.successTrue(200, "구매확정으로 변경되었습니다."));
-    } else if (status == 0) { //다시판매중으로 변경했을때
+    } else if (status == 0) { //다시 판매중으로 변경했을때
         //구매확정테이블에 해당 컬럼있다면 지우기 없다면 그냥 response
+        const confirm = await db.query('SELECT * FROM market.product WHERE userIdx = ? AND productIdx = ?',[token, productIdx])
+        if(!confirm){
+            console.log("처음 구매확정했을때")
+            const putProductQuery = 'UPDATE market.product SET saleStatus = ? WHERE userIdx = ?';
+            const putProductResult = await db.query(putProductQuery, [status,token]);
+        } else if(confirm.length ==1 ){
+            console.log("이미 구매확정하고 돌아왔을때")
+            const delcolunm = await db.query('DELETE FROM market.account WHERE userIdx = ? AND productIdx = ?',[token,buyer])
+            console.log(delcolunm)
+            const putProductQuery = 'UPDATE market.product SET saleStatus = ? WHERE userIdx = ?';
+            const putProductResult = await db.query(putProductQuery, [status,token]);
+        }
         res.send(utils.successTrue(404, "판매중으로 변경하였습니다."));
-    }else {
+    } else {
             res.send(utils.successFalse(404, "등록한 상품이 없거나 권한이 없습니다."));
         }
 };
