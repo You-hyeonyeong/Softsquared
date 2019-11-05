@@ -70,7 +70,7 @@ exports.getMypageBuy = async function (req, res) {
 exports.getMypageSale = async function (req, res) {
 	const tt = jwt.verify(req.headers.token)
 	const token = tt.idx;
-
+//쿼리 이렇게 세번돌리면 안됨!!!!!!!!!!!!!!!!!!!!!!!!!
 	const getsaleing = await db.query('SELECT productIdx, name, info, price FROM product WHERE userIdx = ? AND saleStatus = 0',[token])
 	const getreservation = await db.query('SELECT productIdx, name, info, price FROM product WHERE userIdx = ? AND saleStatus = 1',[token])
 	const getcomplete = await db.query('SELECT productIdx, name, info, price FROM product WHERE userIdx = ? AND saleStatus = 2',[token])

@@ -73,18 +73,17 @@ exports.postReview = async function (req, res) {
     } else res.send(utils.successFalse(404, "범위에 맞는 값을 입력해주세요"));
 };
 //매너평가 조회
-//항목별 평가 명수 추가해야하는데 어떻게 하지
+//항목별 평가 명수 추가해야하는데 어떻게 하지 -> 했다!!!
 exports.getReview = async function (req, res) {
     const tt = jwt.verify(req.headers.token)
     const token = tt.idx;
-     
-    const manner = 'SELECT \
+     //여기서 그룹핑!!!
+    const manner = 'SELECT count(mannerType) as num,\
     CASE WHEN mannerType = 1 then "응답이 빨라요" \
      WHEN mannerType = 2 then "시간약속을 잘 지켜요" \
-     WHEN mannerType = 3 then "친절하고 매너가 좋아요" END\
-    AS mannerType \
-    FROM market.manner m\
-    WHERE userIdx = ? AND mannerType BETWEEN 1 AND 3'
+     WHEN mannerType = 3 then "친절하고 매너가 좋아요" END AS mannerType \
+    FROM market.manner \
+    WHERE userIdx = ? AND mannerType BETWEEN 1 AND 3 GROUP BY mannerType '
     const mannerResult = await db.query(manner,[token])
 
     if(!mannerResult) res.send(utils.successFalse(200, "매너평가 조회 실패"));
